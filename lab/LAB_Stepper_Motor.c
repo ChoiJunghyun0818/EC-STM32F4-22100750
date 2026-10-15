@@ -5,7 +5,7 @@ Created          : 05-03-2021
 Modified         : 10-12-2026
 Language/ver     : C++ in VS Code
 
-Description      : [WRITE THE DESCRIPTION!!!!]
+Description      : main control file for stepper motor
 /----------------------------------------------------------------*/
 
 
