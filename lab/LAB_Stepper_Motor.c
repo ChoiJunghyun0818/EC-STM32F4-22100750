@@ -5,7 +5,7 @@ Created          : 05-03-2021
 Modified         : 10-12-2026
 Language/ver     : C++ in VS Code
 
-Description      : main control file for stepper motor
+Description      : Main code for controlling stepper motor
 /----------------------------------------------------------------*/
 
 
@@ -28,13 +28,14 @@ void setup(void){
 	
 	GPIO_init(PC_13, INPUT);           		// GPIOC pin13 initialization
     EXTI_init(PC_13, FALL,0);           		// External Interrupt Setting
+	// 보통 fall은 버튼을 눌렀을때, rise는 버튼에서 손을 뗐을때
 
 	stepper_init(HALF, pinStepper); 				// Stepper GPIO pin initialization
 	// this part is changed based on the full or half -> problem 6
 	stepper_speed(15);                          		//  set stepper motor speed
 
 	GPIO_init(PC_13, INPUT);  // Replace BT2_PIN with your actual pin
-	EXTI_init(PC_13, FALL, 0);
+	EXTI_init(PC_13, FALL, 0); 
 
 }
 // problem 2. stepper speed 1 rotates the stepper motor about 1 revolutions with 1 rpm.

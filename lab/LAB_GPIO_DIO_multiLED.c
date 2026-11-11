@@ -7,72 +7,53 @@ Language/ver     : C++ in VS Code
 Description      : LAB GPIO Digital InOut - Problem 3 Toggle multiple LEDs with a button 
 /----------------------------------------------------------------*/
 
+#include "stm32f4xx.h"
 #include "ecRCC2.h"
 #include "ecGPIO2.h"
 
-// pin definitions accodring to site
-#define BUTTON_PIN  PA_4    
+// Segment pins: a, b, c, d, e, f, g, dp
+PinName_t pinFND[8]    = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
+// pinName_t -> the data type
+// pinFND -> array that holds 8 pin names and those are = 0~7
 
-#define NUM_LEDS    4
-PinName_t ledPins[NUM_LEDS] = {PB_12, PB_13, PB_14, PB_15}; // LED0 to LED3
+// Digit selection pins: FND0, FND1, FND2, FND3
+PinName_t selectFND[4] = {PA_10, PA_11, PC_4, PC_3};
+// the second array that holds only 4 pins = 10 11 4 3
 
-void setup(void);
-
-int main(void) {
-    // start
-    setup();
-
-    int state = 0;              // current active LED index
-    int btnState = 1;          // current button state
-    int prevBtnState = 1;      // previous button state for edge detection
-
-    // turn on initial LED and turn off all others
-    for (int i = 0; i < NUM_LEDS; i++) {
-        if (i == state) {
-            GPIO_write(ledPins[i], HIGH);
-        } else {
-            GPIO_write(ledPins[i], LOW);
-        }
-    }
-
-    // infinite loop
-    while (1) {
-        btnState = GPIO_read(BUTTON_PIN);
-
-        // falling edge detection: detect when button is newly pressed
-        if (prevBtnState == HIGH && btnState == LOW) {
-            // move to the next LED in sequence
-            state = (state + 1) % NUM_LEDS;
-
-            // update LED: turn ON active LED, turn OFF others
-            for (int i = 0; i < NUM_LEDS; i++) {
-                if (i == state) {
-                    GPIO_write(ledPins[i], HIGH);
-                } else {
-                    GPIO_write(ledPins[i], LOW);
-                }
-            }
-        }
-
-        prevBtnState = btnState; // save current state for next turn
-        delay_ms_HSI(50);        // 50 ms delay 
-    }
+void setup(void){
+    RCC_HSI_init();         // Initialize System Clock -> HSI clock is needed
+    FND_init(pinFND);       // Configure PB_0 ~ PB_7 as Output
+    FND_select_init(selectFND); // Configure PA_10, PA_11, PC_4, PC_3 as Output
 }
 
-// entire function
-void setup(void) {
-    RCC_HSI_init();
+// FND_init and FND_select_init both have alot of functions within them in
+    // ecGPIO2.c source file. instead od using each function and then adding them
+    // we can call all of them by using FND_init and FND_selecr_init
+//FND_init and FND_select_init all have speeds, pupdr and I/O selection within
 
-    // configure switch SW2 (PA_4): Digital IN, Pull-Up
-    GPIO_init(BUTTON_PIN, INPUT);
-    GPIO_pupd(BUTTON_PIN, EC_PU);
 
-    // configure LED_0 ~ LED_3 (PB_12, PB_13, PB_14, PB_15):
-    // digital OUT, Pull-Up, Open-Drain, Medium Speed
-    for (int i = 0; i < NUM_LEDS; i++) {
-        GPIO_init(ledPins[i], OUTPUT);
-        GPIO_pupd(ledPins[i], EC_PU);
-        GPIO_otype(ledPins[i], EC_OPEN_DRAIN);
-        GPIO_ospeed(ledPins[i], EC_MEDIUM_SPEED);
+
+
+int main(void) {
+    setup();
+    
+    uint8_t numDisplay1 = 0; // Show '0'
+    //unsigned 8-bit integer data type = uint8_t
+    uint8_t numDisplay2 = 5; // Show '5'
+    
+    uint8_t selectFND1  = 0; // Digit 0
+    uint8_t selectFND2  = 1; // Digit 1
+
+    while (1) {
+        FND_select(selectFND1);
+        // turn on digit 0
+        FND_display(numDisplay1);
+        // display 0 on 7 seg
+        delay_ms_HSI(1);        
+        // keep degit for this time
+
+        FND_select(selectFND2);
+        FND_display(numDisplay2);
+        delay_ms_HSI(1);    
     }
 }
