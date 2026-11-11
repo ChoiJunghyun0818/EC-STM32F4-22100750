@@ -2,7 +2,7 @@
 @ Embedded Controller by Young-Keun Kim - Handong Global University
 Author           : [Choi Junghyun]
 Created          : 09-14-2026
-Modified         : 05-03-2026 [WRITE THE DATE!!!!]
+Modified         : 09-21-2026 
 Language/ver     : C++ in VS Code
 
 Description      : GPIO Library. Distributed to Students for LAB_GPIO
@@ -101,6 +101,71 @@ uint32_t GPIO_read(PinName_t pinName){
 
 	uint32_t val = (Port->IDR >> pin) & 1UL;
 	return val;
+}
+
+// FND - JKIT board static pin tracking
+static PinName_t _fndPins[8];
+static PinName_t _fndSel[4];
+
+// Lookup table for 7-segment LED states (Common Cathode: 1 = ON, 0 = OFF)
+// Pin order: {a, b, c, d, e, f, g, dp}
+int numberFND[12][8] = {
+    {1, 1, 1, 1, 1, 1, 0, 0}, // 0
+    {0, 1, 1, 0, 0, 0, 0, 0}, // 1
+    {1, 1, 0, 1, 1, 0, 1, 0}, // 2
+    {1, 1, 1, 1, 0, 0, 1, 0}, // 3
+    {0, 1, 1, 0, 0, 1, 1, 0}, // 4
+    {1, 0, 1, 1, 0, 1, 1, 0}, // 5
+    {1, 0, 1, 1, 1, 1, 1, 0}, // 6
+    {1, 1, 1, 0, 0, 1, 0, 0}, // 7
+    {1, 1, 1, 1, 1, 1, 1, 0}, // 8
+    {1, 1, 1, 1, 0, 1, 1, 0}, // 9
+    {0, 0, 0, 0, 0, 0, 0, 1}, // dot
+    {0, 0, 0, 0, 0, 0, 0, 0}  // blank
+};
+
+// Initialize DOUT pins for 7-segment LEDs (PB_0 to PB_7)
+void FND_init(PinName_t *pinFND) {
+    for (int i = 0; i < 8; i++) {
+        _fndPins[i] = pinFND[i];
+        GPIO_init(_fndPins[i], OUTPUT);
+        GPIO_otype(_fndPins[i], EC_PUSH_PULL);
+        GPIO_pupd(_fndPins[i], EC_NONE);
+        GPIO_ospeed(_fndPins[i], EC_MEDIUM_SPEED);
+    }
+}
+
+// Initialize digit select DOUT pins (PA_10, PA_11, PC_4, PC_3)
+void FND_select_init(PinName_t *selectFND) {    
+    for (int i = 0; i < 4; i++) {
+        _fndSel[i] = selectFND[i];
+        GPIO_init(_fndSel[i], OUTPUT);
+        GPIO_otype(_fndSel[i], EC_PUSH_PULL);
+        GPIO_pupd(_fndSel[i], EC_NONE);
+    }
+}
+
+// Write segment data to active digit
+void FND_display(uint8_t num) {
+    for (int i = 0; i < 8; i++) {
+        GPIO_write(_fndPins[i], numberFND[num][i]);
+    }
+}
+
+// Select active digit (FND0 ~ FND3)
+// Note: On JKIT, Digit select lines are Active LOW (0 = ON, 1 = OFF)
+void FND_select(uint8_t digit) {
+    for (int i = 0; i < 4; i++) {
+        if (i == digit) {
+            GPIO_write(_fndSel[i], HIGH);   // Turn ON target digit
+        } else {
+            GPIO_write(_fndSel[i], LOW);  // Turn OFF all other digits
+        }
+    }
+}
+
+void led_toggle(uint32_t pin) {
+    GPIOA->ODR ^= (1UL << pin);
 }
 
 /*---------------------------------------------------------------- 

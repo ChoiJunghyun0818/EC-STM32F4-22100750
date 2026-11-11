@@ -5,7 +5,7 @@ Created          : 05-03-2021
 Modified         : 10-12-2026
 Language/ver     : C++ in VS Code
 
-Description      : stepper motor header file
+Description      : Stepper Library. [WRITE THE DESCRIPTION!!!!]
 /----------------------------------------------------------------*/
 
 #include "stm32f411xe.h"

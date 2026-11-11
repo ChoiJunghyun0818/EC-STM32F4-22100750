@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------\
 @ Embedded Controller by Young-Keun Kim - Handong Global University
 Author           : [Choi Junghyun]
-Created          : 09-14-2026
+Created          : 09-14-2024
 Modified         : 09-21-2026 [WRITE THE DATE!!!!]
 Language/ver     : C++ in VS Code
 
@@ -65,6 +65,21 @@ uint32_t GPIO_read(PinName_t pinName);
 void pinMode(PinName_t pin, uint32_t mode);
 void digitalWrite(PinName_t pin, uint32_t value);
 uint32_t digitalRead(PinName_t pin);
+
+// FND for JKIT board 
+extern int numberFND[12][8];
+void FND_init(PinName_t *pinFND);
+void FND_select_init(PinName_t *selectFND);
+void FND_display(uint8_t num);
+void FND_select(uint8_t digit);
+
+void led_toggle(uint32_t pin);
+
+#include "ecGPIO2.h"
+
+
+
+
 
 #ifdef __cplusplus
 }
